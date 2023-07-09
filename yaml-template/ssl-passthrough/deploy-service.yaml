@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-sslpass
+  labels:
+    app: htpps-echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: https-echo
+  template:
+    metadata:
+      labels:
+        app: https-echo
+    spec:
+      containers:
+      - name: https-echo
+        image: mendhak/http-https-echo
+        ports:
+        - containerPort: 8080
+        - containerPort: 8443
+        volumeMounts:
+        - mountPath: /app/fullchain.pem
+          name: cert-my
+        - mountPath: /app/privkey.pem
+          name: key-my
+      volumes:
+      - name: cert-my
+        hostPath:
+          path: /usr/local/dev/k8s/ssl-passthrough/mn/fullchain.pem
+          type: File
+      - name: key-my
+        hostPath: 
+          path: /usr/local/dev/k8s/ssl-passthrough/mn/privkey.pem
+          type: File
+---
+apiVersion: v1
+kind: Service
+metadata:  
+  name: echo-sslpass
+spec:
+  selector:
+    app: https-echo
+  ports:  
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 8443
+    protocol: TCP

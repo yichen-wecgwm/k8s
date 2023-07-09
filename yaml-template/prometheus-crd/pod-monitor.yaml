@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: prometheus-k8s
+  namespace: app
+spec:
+  selector:
+    matchLabels:
+      metrics: enable
+  podMetricsEndpoints:
+  - port: http
+  - path: /spring-boot-sample/actuator/metrics
